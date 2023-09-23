@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useScroll, useClickAway } from "ahooks";
 import classnames from "classnames";
 
@@ -10,7 +10,6 @@ import { useSearchParams } from "react-router-dom";
 
 function Book() {
   const [searchParams] = useSearchParams();
-
   const [novel, setNovel] = useState<Novel | null>(null);
   const scroll = useScroll(document);
   const [title, setTitle] = useState("");
@@ -19,6 +18,17 @@ function Book() {
   const [sideBarVisible, setSidebarVisible] = useState(false);
   const [index, setIndex] = useState(-1);
   const refSidebar = useRef(null);
+  const [scrollHeight, setScrollHeight] = useState(0);
+
+  const updateScrollHeight = useCallback(() => {
+    requestAnimationFrame(() => {
+      setScrollHeight(document.documentElement.scrollHeight);
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    updateScrollHeight();
+  }, [updateScrollHeight, content]);
 
   useClickAway(
     () => {
@@ -38,42 +48,56 @@ function Book() {
     getBookContent(bookName).then((raw) => setNovel(transformText(raw)));
   }, [bookName]);
 
-  const menus: Array<{ label: string; icon: JSX.Element; onClick: () => void }> = [
-    {
-      label: "目录",
-      icon: <IconFron name="mulu" color="#fff" />,
-      onClick: () => {
-        setToolbarVisible(false);
-        setSidebarVisible((val) => !val);
+  const menus = useMemo(() => {
+    interface Menu {
+      label: string;
+      icon: JSX.Element;
+      onClick: () => void;
+    }
+
+    const arr: Array<Menu> = [
+      {
+        label: "目录",
+        icon: <IconFron name="mulu" color="#fff" />,
+        onClick: () => {
+          setToolbarVisible(false);
+          setSidebarVisible((val) => !val);
+        },
       },
-    },
-    {
-      label: "亮度",
-      icon: <IconFron name="liangdu" color="#fff" />,
-      onClick: () => {},
-    },
-    {
-      label: "夜间模式",
-      icon: <IconFron name="yejianmoshi" color="#fff" />,
-      onClick: () => {},
-    },
-    {
-      label: "设置",
-      icon: <IconFron name="shezhi" color="#fff" />,
-      onClick: () => {},
-    },
-  ];
+      {
+        label: "亮度",
+        icon: <IconFron name="liangdu" color="#fff" />,
+        onClick: () => {},
+      },
+      {
+        label: "夜间模式",
+        icon: <IconFron name="yejianmoshi" color="#fff" />,
+        onClick: () => {},
+      },
+      {
+        label: "设置",
+        icon: <IconFron name="shezhi" color="#fff" />,
+        onClick: () => {},
+      },
+    ];
+
+    return arr;
+  }, []);
 
   const percent = useMemo(() => {
     const scrollTop = scroll?.top || 0;
-    const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const totalHeight = scrollHeight - window.innerHeight;
+
+    if (totalHeight === 0) {
+      return 100;
+    }
 
     const scrollPercentage = parseInt(`${(scrollTop / totalHeight) * 100}`);
 
     if (Number.isNaN(scrollPercentage)) return 0;
 
     return scrollPercentage;
-  }, [scroll?.top]);
+  }, [scroll?.top, scrollHeight]);
 
   useEffect(() => {
     if (!novel) return;
@@ -131,6 +155,12 @@ function Book() {
     }
   }, []);
 
+  const onClickFooter = useCallback(() => {
+    if (percent < 90) return;
+
+    nextSection();
+  }, [nextSection, percent]);
+
   return (
     <div className={styles.reader}>
       {/* 侧边栏 */}
@@ -168,7 +198,11 @@ function Book() {
       </div>
 
       {/* 底部状态栏 */}
-      <div className={styles.footer}>{percent}%</div>
+      <div className={styles.footer} onClick={onClickFooter}>
+        <div className={styles.inner} style={{ width: percent + "%" }}></div>
+        <div className={styles.text}>{percent}%</div>
+        {percent > 90 ? <div className={styles.nextPage}>点击加载下一章</div> : null}
+      </div>
 
       {/* 工具栏 */}
       <div className={classnames(styles.toolbar, toolbarVisible ? styles.visible : undefined)}>

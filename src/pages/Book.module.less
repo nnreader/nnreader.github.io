@@ -3,7 +3,7 @@
 
 .reader {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .sidebar {
@@ -78,6 +78,7 @@
 }
 
 .footer {
+  position: relative;
   width: 100%;
   height: @footerHeight;
   line-height: @footerHeight;
@@ -88,6 +89,28 @@
   color: #fff;
   font-size: 12px;
   padding: 0 8px;
+
+  .text {
+    position: relative;
+    z-index: 10;
+  }
+
+  .nextPage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .inner {
+    position: absolute;
+    top: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(to right, #544c22, #3ac276);
+    z-index: 0;
+  }
 }
 
 .toolbar {
