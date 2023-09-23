@@ -6,9 +6,11 @@ import { getBookContent } from "../lib/assets";
 import styles from "./Book.module.less";
 import { Novel, transformText } from "../novel";
 import IconFron from "../components/react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 function Book() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [novel, setNovel] = useState<Novel | null>(null);
   const scroll = useScroll(document);
@@ -16,7 +18,7 @@ function Book() {
   const [content, setContent] = useState("");
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const [sideBarVisible, setSidebarVisible] = useState(false);
-  const [index, setIndex] = useState(-1);
+  const [index, setIndex] = useState(searchParams.get("index") ? +searchParams.get("index")! : -1);
   const refSidebar = useRef(null);
   const [scrollHeight, setScrollHeight] = useState(0);
 
@@ -120,16 +122,40 @@ function Book() {
     });
   }, [content]);
 
+  const nextable = useMemo(() => {
+    if (!novel) return false;
+    return index < novel.sections?.length - 1;
+  }, [index, novel]);
+
   const prevSection = useCallback(() => {
-    setIndex((i) => Math.max(i - 1, -1));
     setToolbarVisible(false);
-  }, []);
+
+    const newIndex = Math.max(index - 1, -1);
+    setIndex(newIndex);
+
+    const searchParams = new URLSearchParams(location.search);
+
+    searchParams.set("index", newIndex + "");
+
+    const newSearchParams = searchParams.toString();
+
+    navigate({ pathname: location.pathname, search: newSearchParams });
+  }, [index, location.pathname, location.search, navigate]);
 
   const nextSection = useCallback(() => {
     if (!novel) return;
-    setIndex((i) => Math.min(i + 1, novel.sections.length - 1));
+    const newIndex = Math.min(index + 1, novel.sections.length - 1);
+    setIndex(newIndex);
     setToolbarVisible(false);
-  }, [novel]);
+
+    const searchParams = new URLSearchParams(location.search);
+
+    searchParams.set("index", newIndex + "");
+
+    const newSearchParams = searchParams.toString();
+
+    navigate({ pathname: location.pathname, search: newSearchParams });
+  }, [index, location.pathname, location.search, navigate, novel]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClickContent = useCallback((event: any) => {
@@ -156,7 +182,7 @@ function Book() {
   }, []);
 
   const onClickFooter = useCallback(() => {
-    if (percent < 90) return;
+    if (percent < 95) return;
 
     nextSection();
   }, [nextSection, percent]);
@@ -201,7 +227,7 @@ function Book() {
       <div className={styles.footer} onClick={onClickFooter}>
         <div className={styles.inner} style={{ width: percent + "%" }}></div>
         <div className={styles.text}>{percent}%</div>
-        {percent > 90 ? <div className={styles.nextPage}>点击加载下一章</div> : null}
+        {percent > 95 ? <div className={styles.nextPage}>{nextable ? "点击加载下一章" : "已没有更多"}</div> : null}
       </div>
 
       {/* 工具栏 */}
