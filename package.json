@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "iconfont": "iconfont-componentized --url //at.alicdn.com/t/c/font_4245222_8bedsys2r2s.js --config iconfont-componentized.json --target react --output ./src/components"
+    "iconfont": "iconfont-componentized --url //at.alicdn.com/t/c/font_4245222_bddqj6tyw7s.js --config iconfont-componentized.json --target react --output ./src/components"
   },
   "dependencies": {
     "@csstools/normalize.css": "^12.0.0",

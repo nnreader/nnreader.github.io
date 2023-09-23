@@ -7,6 +7,7 @@ import styles from "./Book.module.less";
 import { Novel, transformText } from "../novel";
 import IconFron from "../components/react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { NavBar } from "antd-mobile";
 
 function Book() {
   const location = useLocation();
@@ -191,6 +192,7 @@ function Book() {
     <div className={styles.reader}>
       {/* 侧边栏 */}
       <div ref={refSidebar} className={classnames(styles.sidebar, sideBarVisible ? styles.sidebarVisible : undefined)}>
+        <h3>{bookName}</h3>
         <ul>
           {novel &&
             novel.sections.map((section, i) => {
@@ -212,11 +214,23 @@ function Book() {
       </div>
 
       {/* 标题栏 */}
-      <div className={styles.header}>
+      <NavBar
+        className={styles.header}
+        onBack={() => navigate(-1)}
+        left={
+          <div className={styles.rightIcon}>
+            <IconFron style={{ marginRight: 8 }} name="home" color="#fff" onClick={() => navigate("/")} />
+          </div>
+        }
+        right={
+          <div className={styles.rightIcon}>
+            <IconFron style={{ marginRight: 8 }} name="mulu" color="#fff" onClick={() => setSidebarVisible((val) => !val)} />
+            <IconFron name="gengduo" color="#fff" onClick={() => setToolbarVisible((val) => !val)} />
+          </div>
+        }
+      >
         <span>{title}</span>
-        <IconFron style={{ marginRight: 4 }} name="mulu" color="#fff" onClick={() => setSidebarVisible((val) => !val)} />
-        <IconFron name="gengduo" color="#fff" onClick={() => setToolbarVisible((val) => !val)} />
-      </div>
+      </NavBar>
 
       {/* 主题内容 */}
       <div className={styles.content} onClick={onClickContent}>
@@ -224,7 +238,7 @@ function Book() {
       </div>
 
       {/* 底部状态栏 */}
-      <div className={styles.footer} onClick={onClickFooter}>
+      <div className={styles.footer} style={{ visibility: title ? "visible" : "hidden" }} onClick={onClickFooter}>
         <div className={styles.inner} style={{ width: percent + "%" }}></div>
         <div className={styles.text}>{percent}%</div>
         {percent > 95 ? <div className={styles.nextPage}>{nextable ? "点击加载下一章" : "已没有更多"}</div> : null}
