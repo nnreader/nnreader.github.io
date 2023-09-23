@@ -1,0 +1,46 @@
+{
+  "name": "nove-reader",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 1234",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "iconfont": "iconfont-componentized --url //at.alicdn.com/t/c/font_4245222_8bedsys2r2s.js --config iconfont-componentized.json --target react --output ./src/components"
+  },
+  "dependencies": {
+    "@csstools/normalize.css": "^12.0.0",
+    "@zip.js/zip.js": "^2.7.29",
+    "ahooks": "^3.7.8",
+    "classnames": "^2.3.2",
+    "crypto-js": "^4.1.1",
+    "fastclick": "^1.0.6",
+    "firebase": "^10.4.0",
+    "jszip": "^3.10.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.16.0",
+    "react-router-dom": "^6.16.0"
+  },
+  "devDependencies": {
+    "@iconfont-componentized/cli": "^0.2.12",
+    "@types/crypto-js": "^4.1.2",
+    "@types/fastclick": "^1.0.30",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "js-flipper": "^0.212.0",
+    "less": "^4.2.0",
+    "postcss-100vh-fix": "^1.0.2",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.5",
+    "vite-plugin-top-level-await": "^1.3.1"
+  }
+}
