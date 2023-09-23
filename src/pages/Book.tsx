@@ -245,7 +245,7 @@ function Book() {
       </div>
 
       {/* 工具栏 */}
-      <div className={classnames(styles.toolbar, toolbarVisible ? styles.visible : undefined)}>
+      <div className={classnames(styles.toolbar, toolbarVisible ? styles.visible : styles.invisible)}>
         <div className={styles.navigator}>
           <div onClick={prevSection}>上一章</div>
           <div>{percent}%</div>

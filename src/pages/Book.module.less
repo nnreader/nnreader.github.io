@@ -116,20 +116,22 @@
 
 .toolbar {
   position: fixed;
-  bottom: -100%;
   left: 0;
-  height: 60px;
   width: 100%;
   background-color: #303030;
   transition: all 0.5s ease-in-out;
   user-select: none;
 
+  &.invisible {
+    top: 100%;
+  }
+
   &.visible {
-    bottom: 0;
+    top: calc(100% - 92px);
   }
 
   .navigator {
-    position: absolute;
+    // position: absolute;
     bottom: 100%;
     width: 100%;
     height: 22px;
