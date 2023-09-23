@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/axetroy/iconfont-componentized/main/packages/share/src/config/schema.json",
+  "defaultSize": 24,
+  "classNamePrefix": "icon-font"
+}
