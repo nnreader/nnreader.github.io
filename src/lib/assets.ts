@@ -1,11 +1,12 @@
-import { BlobReader, ZipReader, TextWriter, BlobWriter } from "@zip.js/zip.js";
+import { ZipReader, TextWriter, Uint8ArrayReader, Uint8ArrayWriter } from "@zip.js/zip.js";
+import axios from "axios";
 import zipURL from "../../books/books.zip";
 
 let cachedZip: ZipReader<unknown> | void;
 
-async function readZipFile(filePath: string): Promise<ZipReader<unknown>> {
-  const response = await fetch(filePath);
+type onProgress = (percent: number) => void;
 
+async function readZipFile(filePath: string, onProgress?: onProgress): Promise<ZipReader<unknown>> {
   const password = sessionStorage.getItem("password") ?? window.prompt("请输入密码");
 
   if (!password) {
@@ -14,21 +15,30 @@ async function readZipFile(filePath: string): Promise<ZipReader<unknown>> {
     throw new Error("未输入密码");
   }
 
-  const decode = (zipBlob: Blob) => {
+  const resp = await axios.get<ArrayBuffer>(filePath, {
+    responseType: "arraybuffer",
+    onDownloadProgress: (e) => {
+      const percent = e.total ? Math.floor((e.loaded / e.total) * 100) : 0;
+
+      onProgress?.(percent);
+    },
+  });
+
+  const decode = (buff: Uint8Array) => {
     if (!password) throw new Error("invalid password");
 
-    const zip = new ZipReader(new BlobReader(zipBlob), { filenameEncoding: "utf8", password: password });
+    const zip = new ZipReader(new Uint8ArrayReader(buff), { filenameEncoding: "utf8", password: password });
 
     return zip;
   };
 
-  const outerZip = decode(await response.blob());
+  const outerZip = decode(new Uint8Array(resp.data));
 
   const entries = await outerZip.getEntries();
 
   const entry = entries[0];
 
-  const writer = new BlobWriter();
+  const writer = new Uint8ArrayWriter();
 
   await entry.getData?.(writer);
 
@@ -43,16 +53,16 @@ async function readZipFile(filePath: string): Promise<ZipReader<unknown>> {
   return innerZip;
 }
 
-export async function getBooks(): Promise<string[]> {
-  const zip = cachedZip ?? (await readZipFile(zipURL));
+export async function getBooks(onProgress?: onProgress): Promise<string[]> {
+  const zip = cachedZip ?? (await readZipFile(zipURL, onProgress));
 
   const entries = await zip.getEntries();
 
   return entries.map((v) => v.filename);
 }
 
-export async function getBookContent(bookName: string): Promise<string> {
-  const zip = cachedZip ?? (await readZipFile(zipURL));
+export async function getBookContent(bookName: string, onProgress?: onProgress): Promise<string> {
+  const zip = cachedZip ?? (await readZipFile(zipURL, onProgress));
 
   const entries = await zip.getEntries();
 
