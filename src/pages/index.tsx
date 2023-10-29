@@ -1,23 +1,20 @@
 import { Link } from "react-router-dom";
-import { getBooks } from "../lib/assets";
+import { Book, getBooks } from "../lib/assets";
 import styles from "./index.module.less";
 import { useEffect, useState } from "react";
 import { DotLoading, Toast } from "antd-mobile";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [books, setBooks] = useState<string[]>([]);
-  const [percent, setPercent] = useState(0);
+  const [books, setBooks] = useState<Book[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
-    getBooks(setPercent)
+    getBooks()
       .then((data) => {
         setBooks(data);
       })
       .catch((err) => {
-        // eslint-disable-next-line no-debugger
-        debugger;
         Toast.show({
           icon: "fail",
           content: err.message,
@@ -32,15 +29,15 @@ const Index = () => {
     <div className={styles.container}>
       {isLoading ? (
         <>
-          <DotLoading className={styles.loading} /> {percent}%
+          <DotLoading className={styles.loading} />
         </>
       ) : (
         <ul>
           {books.map((book) => {
             return (
-              <li key={book}>
-                <Link style={{ color: "#fff" }} to={"/book?name=" + btoa(encodeURIComponent(book))}>
-                  {book}
+              <li key={book.index + book.name}>
+                <Link style={{ color: "#fff" }} to={"/book?id=" + book.index}>
+                  {book.name}
                 </Link>
               </li>
             );

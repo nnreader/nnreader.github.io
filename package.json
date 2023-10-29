@@ -17,7 +17,7 @@
     "antd-mobile": "^5.32.4",
     "axios": "^1.5.1",
     "classnames": "^2.3.2",
-    "crypto-js": "^4.1.1",
+    "crypto-js": "^4.2.0",
     "fastclick": "^1.0.6",
     "firebase": "^10.4.0",
     "jszip": "^3.10.1",

@@ -6,7 +6,7 @@ declare module "*.encrypted" {
   export default content;
 }
 
-declare module "*.zip" {
+declare module "*.data" {
   const content: string;
 
   export default content;

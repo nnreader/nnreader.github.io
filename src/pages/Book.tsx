@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useScroll, useClickAway } from "ahooks";
 import classnames from "classnames";
 
-import { getBookContent } from "../lib/assets";
+import { getBookInfo } from "../lib/assets";
 import styles from "./Book.module.less";
 import { Novel, transformText } from "../novel";
 import IconFron from "../components/react";
@@ -22,6 +22,7 @@ function Book() {
   const [index, setIndex] = useState(searchParams.get("index") ? +searchParams.get("index")! : -1);
   const refSidebar = useRef(null);
   const [scrollHeight, setScrollHeight] = useState(0);
+  const [bookName, setBookName] = useState("");
 
   const updateScrollHeight = useCallback(() => {
     requestAnimationFrame(() => {
@@ -43,13 +44,16 @@ function Book() {
     "click"
   );
 
-  const bookName = useMemo(() => {
-    return decodeURIComponent(atob(searchParams.get("name") as string));
+  const bookId = useMemo(() => {
+    return searchParams.get("id") as string;
   }, [searchParams]);
 
   useEffect(() => {
-    getBookContent(bookName).then((raw) => setNovel(transformText(raw)));
-  }, [bookName]);
+    getBookInfo(bookId).then((data) => {
+      setBookName(data.info.name);
+      setNovel(transformText(data.content));
+    });
+  }, [bookId]);
 
   const menus = useMemo(() => {
     interface Menu {
@@ -117,16 +121,21 @@ function Book() {
     window.scrollTo(0, 0);
   }, [index, novel, novel?.description, novel?.sections]);
 
+  const nextable = useMemo(() => {
+    if (!novel) return false;
+    return index < novel.sections?.length - 1;
+  }, [index, novel]);
+
+  // const prevable = useMemo(() => {
+  //   if (!novel) return false;
+  //   return index > 0;
+  // }, [index, novel]);
+
   const params = useMemo(() => {
     return content.split("\n").map((v, index) => {
       return <p key={index}>{v.trim().replace(/\s+/g, " ")}</p>;
     });
   }, [content]);
-
-  const nextable = useMemo(() => {
-    if (!novel) return false;
-    return index < novel.sections?.length - 1;
-  }, [index, novel]);
 
   const prevSection = useCallback(() => {
     setToolbarVisible(false);
@@ -188,6 +197,32 @@ function Book() {
     nextSection();
   }, [nextSection, percent]);
 
+  // useEffect(() => {
+  //   function onTouchEnd() {
+  //     const scrollTop = scroll?.top || 0;
+
+  //     const totalHeight = scrollHeight - window.innerHeight;
+
+  //     if (totalHeight === 0) {
+  //       return 100;
+  //     }
+
+  //     const scrollPercentage = parseInt(`${(scrollTop / totalHeight) * 100}`);
+
+  //     if (scrollPercentage > 100) {
+  //       requestAnimationFrame(() => {
+  //         nextSection();
+  //       });
+  //     }
+  //   }
+
+  //   document.addEventListener("touchend", onTouchEnd);
+
+  //   return () => {
+  //     document.removeEventListener("touchend", onTouchEnd);
+  //   };
+  // }, [nextSection, scroll?.top, scrollHeight]);
+
   return (
     <div className={styles.reader}>
       {/* 侧边栏 */}
@@ -242,6 +277,8 @@ function Book() {
         <div className={styles.inner} style={{ width: percent + "%" }}></div>
         <div className={styles.text}>{percent}%</div>
         {percent > 95 ? <div className={styles.nextPage}>{nextable ? "点击加载下一章" : "已没有更多"}</div> : null}
+
+        {percent > 100 && nextable ? <div className={styles.scrollNextPage}>松开加载下一章</div> : null}
       </div>
 
       {/* 工具栏 */}

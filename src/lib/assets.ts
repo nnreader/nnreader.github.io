@@ -1,13 +1,18 @@
-import { ZipReader, TextWriter, Uint8ArrayReader, Uint8ArrayWriter } from "@zip.js/zip.js";
 import axios from "axios";
-import zipURL from "../../books/books.zip";
+import rc4 from "crypto-js/rc4";
+import Utf8 from "crypto-js/enc-utf8";
+import meta from "../assets/meta.data?raw";
 
-let cachedZip: ZipReader<unknown> | void;
+export interface Book {
+  index: string;
+  name: string;
+  size: number;
+}
 
-type onProgress = (percent: number) => void;
+let password: string | null = null;
 
-async function readZipFile(filePath: string, onProgress?: onProgress): Promise<ZipReader<unknown>> {
-  const password = sessionStorage.getItem("password") ?? window.prompt("请输入密码");
+function requirePassword() {
+  password = sessionStorage.getItem("password") ?? window.prompt("请输入密码");
 
   if (!password) {
     alert("未输入密码");
@@ -15,66 +20,52 @@ async function readZipFile(filePath: string, onProgress?: onProgress): Promise<Z
     throw new Error("未输入密码");
   }
 
-  const resp = await axios.get<ArrayBuffer>(filePath, {
-    responseType: "arraybuffer",
-    onDownloadProgress: (e) => {
-      const percent = e.total ? Math.floor((e.loaded / e.total) * 100) : 0;
+  return password;
+}
 
-      onProgress?.(percent);
-    },
-  });
+// eslint-disable-next-line @typescript-eslint/ban-types
+function successWrap<T extends Function>(fn: T): T {
+  // @ts-expect-error ignore
+  return async function () {
+    password = requirePassword();
 
-  const decode = (buff: Uint8Array) => {
-    if (!password) throw new Error("invalid password");
+    try {
+      // eslint-disable-next-line prefer-spread, prefer-rest-params
+      const result = fn.apply(null, arguments);
 
-    const zip = new ZipReader(new Uint8ArrayReader(buff), { filenameEncoding: "utf8", password: password });
+      sessionStorage.setItem("password", password);
 
-    return zip;
+      return result;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   };
-
-  const outerZip = decode(new Uint8Array(resp.data));
-
-  const entries = await outerZip.getEntries();
-
-  const entry = entries[0];
-
-  const writer = new Uint8ArrayWriter();
-
-  await entry.getData?.(writer);
-
-  const blob = await writer.getData();
-
-  const innerZip = decode(blob);
-
-  sessionStorage.setItem("password", password);
-
-  cachedZip = innerZip;
-
-  return innerZip;
 }
 
-export async function getBooks(onProgress?: onProgress): Promise<string[]> {
-  const zip = cachedZip ?? (await readZipFile(zipURL, onProgress));
+async function _getBooks(): Promise<Book[]> {
+  const books: Book[] = JSON.parse(rc4.decrypt(meta, password as string).toString(Utf8));
 
-  const entries = await zip.getEntries();
-
-  return entries.map((v) => v.filename);
+  return books;
 }
 
-export async function getBookContent(bookName: string, onProgress?: onProgress): Promise<string> {
-  const zip = cachedZip ?? (await readZipFile(zipURL, onProgress));
+export const getBooks = successWrap(_getBooks);
 
-  const entries = await zip.getEntries();
+async function _getBookInfo(bookIndex: string): Promise<{ info: Book; content: string }> {
+  const books: Book[] = JSON.parse(rc4.decrypt(meta, password as string).toString(Utf8));
 
-  const entry = entries.find((v) => v.filename === bookName);
+  const bookInfo = books.find((v) => v.index === bookIndex);
 
-  if (!entry) {
-    throw new Error(`can not found book '${bookName}'`);
-  }
+  if (!bookInfo) throw new Error("未找到数据");
 
-  const writer = new TextWriter();
+  const url = new URL(`resources/${bookIndex}.txt`, location.href).toString();
 
-  await entry.getData?.(writer);
+  const resp = await axios.get<string>(url);
 
-  return writer.getData();
+  return {
+    info: bookInfo,
+    content: rc4.decrypt(resp.data, password as string).toString(Utf8),
+  };
 }
+
+export const getBookInfo = successWrap(_getBookInfo);

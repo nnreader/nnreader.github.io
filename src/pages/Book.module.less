@@ -78,7 +78,6 @@
 }
 
 .footer {
-  position: relative;
   width: 100%;
   height: @footerHeight;
   line-height: @footerHeight;
@@ -111,6 +110,18 @@
     height: 100%;
     background: linear-gradient(to right, #544c22, #3ac276);
     z-index: 0;
+  }
+
+  .scrollNextPage {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #3ac276;
+    border-radius: 8px;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    color: #303030;
   }
 }
 
