@@ -9,6 +9,8 @@ export interface Book {
   size: number;
 }
 
+type onProgress = (percent: number) => void;
+
 let password: string | null = null;
 
 function requirePassword() {
@@ -51,7 +53,7 @@ async function _getBooks(): Promise<Book[]> {
 
 export const getBooks = successWrap(_getBooks);
 
-async function _getBookInfo(bookIndex: string): Promise<{ info: Book; content: string }> {
+async function _getBookInfo(bookIndex: string, onProgress?: onProgress): Promise<{ info: Book; content: string }> {
   const books: Book[] = JSON.parse(rc4.decrypt(meta, password as string).toString(Utf8));
 
   const bookInfo = books.find((v) => v.index === bookIndex);
@@ -60,7 +62,13 @@ async function _getBookInfo(bookIndex: string): Promise<{ info: Book; content: s
 
   const url = new URL(`resources/${bookIndex}.txt`, location.href).toString();
 
-  const resp = await axios.get<string>(url);
+  const resp = await axios.get<string>(url, {
+    onDownloadProgress: (e) => {
+      const percent = e.total ? Math.floor((e.loaded / e.total) * 100) : 0;
+
+      onProgress?.(percent);
+    },
+  });
 
   return {
     info: bookInfo,

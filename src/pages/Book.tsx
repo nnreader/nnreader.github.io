@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useScroll, useClickAway } from "ahooks";
 import classnames from "classnames";
+import { DotLoading } from "antd-mobile";
 
 import { getBookInfo } from "../lib/assets";
 import styles from "./Book.module.less";
@@ -23,6 +24,7 @@ function Book() {
   const refSidebar = useRef(null);
   const [scrollHeight, setScrollHeight] = useState(0);
   const [bookName, setBookName] = useState("");
+  const [progress, setProgress] = useState(0);
 
   const updateScrollHeight = useCallback(() => {
     requestAnimationFrame(() => {
@@ -49,7 +51,7 @@ function Book() {
   }, [searchParams]);
 
   useEffect(() => {
-    getBookInfo(bookId).then((data) => {
+    getBookInfo(bookId, setProgress).then((data) => {
       setBookName(data.info.name);
       setNovel(transformText(data.content));
     });
@@ -132,10 +134,17 @@ function Book() {
   // }, [index, novel]);
 
   const params = useMemo(() => {
+    if (progress !== 100)
+      return (
+        <>
+          <DotLoading className={styles.loading} /> {progress}%
+        </>
+      );
+
     return content.split("\n").map((v, index) => {
       return <p key={index}>{v.trim().replace(/\s+/g, " ")}</p>;
     });
-  }, [content]);
+  }, [content, progress]);
 
   const prevSection = useCallback(() => {
     setToolbarVisible(false);
