@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useScroll, useClickAway } from "ahooks";
 import classnames from "classnames";
 import { DotLoading } from "antd-mobile";
+import { debounce } from "lodash-es";
 
 import { getBookInfo } from "../lib/assets";
 import styles from "./Book.module.less";
@@ -25,6 +26,21 @@ function Book() {
   const [scrollHeight, setScrollHeight] = useState(0);
   const [bookName, setBookName] = useState("");
   const [progress, setProgress] = useState(0);
+  const [showNextPage, setShowNextPage] = useState(false);
+
+  const updateShowNextPage = useMemo(() => {
+    return debounce(
+      (top?: number) => {
+        setShowNextPage(top ? top > 100 : false);
+      },
+      500,
+      { maxWait: 1000 }
+    );
+  }, []);
+
+  useEffect(() => {
+    updateShowNextPage(scroll?.top);
+  }, [scroll?.top, updateShowNextPage]);
 
   const updateScrollHeight = useCallback(() => {
     requestAnimationFrame(() => {
@@ -36,6 +52,7 @@ function Book() {
     updateScrollHeight();
   }, [updateScrollHeight, content]);
 
+  // 点击其他内容时，收起侧边栏
   useClickAway(
     () => {
       if (sideBarVisible) {
@@ -50,12 +67,23 @@ function Book() {
     return searchParams.get("id") as string;
   }, [searchParams]);
 
+  // 获取章节信息
   useEffect(() => {
     getBookInfo(bookId, setProgress).then((data) => {
       setBookName(data.info.name);
       setNovel(transformText(data.content));
     });
   }, [bookId]);
+
+  // 显示侧边栏时，聚焦到当前章节
+  useEffect(() => {
+    if (sideBarVisible) {
+      // 显示侧边栏
+      const dom = document.querySelector("." + styles.activeSection);
+
+      dom?.scrollIntoView();
+    }
+  }, [sideBarVisible]);
 
   const menus = useMemo(() => {
     interface Menu {
@@ -93,6 +121,7 @@ function Book() {
     return arr;
   }, []);
 
+  // 页面滚动的百分比
   const percent = useMemo(() => {
     const scrollTop = scroll?.top || 0;
     const totalHeight = scrollHeight - window.innerHeight;
@@ -108,6 +137,7 @@ function Book() {
     return scrollPercentage;
   }, [scroll?.top, scrollHeight]);
 
+  // 切换章节时，滚动到顶部
   useEffect(() => {
     if (!novel) return;
 
@@ -123,6 +153,7 @@ function Book() {
     window.scrollTo(0, 0);
   }, [index, novel, novel?.description, novel?.sections]);
 
+  // 是否可以下一章
   const nextable = useMemo(() => {
     if (!novel) return false;
     return index < novel.sections?.length - 1;
@@ -133,6 +164,7 @@ function Book() {
   //   return index > 0;
   // }, [index, novel]);
 
+  // 渲染章节内容
   const params = useMemo(() => {
     if (!bookName && progress < 100)
       return (
@@ -146,6 +178,7 @@ function Book() {
     });
   }, [bookName, content, progress]);
 
+  // 上一章
   const prevSection = useCallback(() => {
     setToolbarVisible(false);
 
@@ -161,6 +194,7 @@ function Book() {
     navigate({ pathname: location.pathname, search: newSearchParams });
   }, [index, location.pathname, location.search, navigate]);
 
+  // 下一章
   const nextSection = useCallback(() => {
     if (!novel) return;
     const newIndex = Math.min(index + 1, novel.sections.length - 1);
@@ -176,6 +210,7 @@ function Book() {
     navigate({ pathname: location.pathname, search: newSearchParams });
   }, [index, location.pathname, location.search, navigate, novel]);
 
+  // 点击内容，展开/收起 内容
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClickContent = useCallback((event: any) => {
     // 获取点击事件的坐标信息
@@ -200,37 +235,39 @@ function Book() {
     }
   }, []);
 
+  // 点击底部状态栏，下一章
   const onClickFooter = useCallback(() => {
     if (percent < 95) return;
 
     nextSection();
   }, [nextSection, percent]);
 
-  // useEffect(() => {
-  //   function onTouchEnd() {
-  //     const scrollTop = scroll?.top || 0;
+  // 下拉刷新下一章
+  useEffect(() => {
+    function onTouchEnd() {
+      const scrollTop = scroll?.top || 0;
 
-  //     const totalHeight = scrollHeight - window.innerHeight;
+      const totalHeight = scrollHeight - window.innerHeight;
 
-  //     if (totalHeight === 0) {
-  //       return 100;
-  //     }
+      if (totalHeight === 0) {
+        return 100;
+      }
 
-  //     const scrollPercentage = parseInt(`${(scrollTop / totalHeight) * 100}`);
+      const scrollPercentage = parseInt(`${(scrollTop / totalHeight) * 100}`);
 
-  //     if (scrollPercentage > 100) {
-  //       requestAnimationFrame(() => {
-  //         nextSection();
-  //       });
-  //     }
-  //   }
+      if (scrollPercentage > 100 && showNextPage) {
+        requestAnimationFrame(() => {
+          nextSection();
+        });
+      }
+    }
 
-  //   document.addEventListener("touchend", onTouchEnd);
+    document.addEventListener("touchend", onTouchEnd);
 
-  //   return () => {
-  //     document.removeEventListener("touchend", onTouchEnd);
-  //   };
-  // }, [nextSection, scroll?.top, scrollHeight]);
+    return () => {
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [nextSection, scroll?.top, scrollHeight, showNextPage]);
 
   return (
     <div className={styles.reader}>
@@ -287,7 +324,7 @@ function Book() {
         <div className={styles.text}>{percent}%</div>
         {percent > 95 ? <div className={styles.nextPage}>{nextable ? "点击加载下一章" : "已没有更多"}</div> : null}
 
-        {percent > 100 && nextable ? <div className={styles.scrollNextPage}>松开加载下一章</div> : null}
+        {percent > 100 && nextable && showNextPage ? <div className={styles.scrollNextPage}>松开加载下一章</div> : null}
       </div>
 
       {/* 工具栏 */}
