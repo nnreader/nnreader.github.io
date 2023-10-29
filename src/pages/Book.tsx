@@ -134,7 +134,7 @@ function Book() {
   // }, [index, novel]);
 
   const params = useMemo(() => {
-    if (progress !== 100)
+    if (!bookName && progress < 100)
       return (
         <>
           <DotLoading className={styles.loading} /> {progress}%
@@ -144,7 +144,7 @@ function Book() {
     return content.split("\n").map((v, index) => {
       return <p key={index}>{v.trim().replace(/\s+/g, " ")}</p>;
     });
-  }, [content, progress]);
+  }, [bookName, content, progress]);
 
   const prevSection = useCallback(() => {
     setToolbarVisible(false);
