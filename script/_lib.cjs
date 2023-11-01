@@ -4,8 +4,7 @@ const fsPromise = require("fs/promises");
 const path = require("path");
 const crypto = require("crypto");
 
-const rc4 = require("crypto-js/rc4");
-const Utf8 = require("crypto-js/enc-utf8");
+const CryptoJS = require("crypto-js");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const RESOURCE = path.join(ROOT_DIR, "resources");
@@ -15,7 +14,12 @@ const META_FILE_PATH = path.join(ROOT_DIR, "src", "assets", "meta.data");
 const meta = [];
 const password = process.env.BOOK_PASSWORD;
 
-if (!password) throw new Error('not found password')
+// 固定IV值，与Node.js中相同
+const fixedIV = new Uint8Array([0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef]);
+
+const iv = CryptoJS.enc.Utf8.parse(new TextDecoder().decode(fixedIV).toString());
+
+if (!password) throw new Error("not found password");
 
 async function generate() {
   const items = fs
@@ -57,8 +61,6 @@ async function restore() {
     fs.mkdirSync(RESOURCE);
   }
 
-  console.log(RESOURCE)
-
   for (const item of meta) {
     const rawContent = fs.readFileSync(path.join(outputAssetsDir, item.index + ".txt"), { encoding: "utf-8" });
 
@@ -71,11 +73,17 @@ async function restore() {
 }
 
 function encrypt(content) {
-  return rc4.encrypt(content, password).toString();
+  const key = CryptoJS.enc.Utf8.parse(password);
+  return CryptoJS.RC4.encrypt(content, key, {
+    iv: iv,
+  }).toString();
 }
 
 function decrypt(content) {
-  return rc4.decrypt(content, password).toString(Utf8);
+  const key = CryptoJS.enc.Utf8.parse(password);
+  return CryptoJS.RC4.decrypt(content, key, {
+    iv: iv,
+  }).toString(CryptoJS.enc.Utf8);
 }
 
 function md5(filePath) {

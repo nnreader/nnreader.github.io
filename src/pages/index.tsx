@@ -15,6 +15,7 @@ const Index = () => {
         setBooks(data);
       })
       .catch((err) => {
+        console.error(err)
         Toast.show({
           icon: "fail",
           content: err.message,
