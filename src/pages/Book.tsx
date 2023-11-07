@@ -305,12 +305,20 @@ function Book() {
         }
         right={
           <div className={styles.rightIcon}>
-            <IconFron style={{ marginRight: 8 }} name="mulu" color="#fff" onClick={() => setSidebarVisible((val) => !val)} />
+            <IconFron
+              style={{ marginRight: 8 }}
+              name="mulu"
+              color="#fff"
+              onClick={(event) => {
+                event.stopPropagation();
+                setSidebarVisible((val) => !val);
+              }}
+            />
             <IconFron name="gengduo" color="#fff" onClick={() => setToolbarVisible((val) => !val)} />
           </div>
         }
       >
-        <span>{title}</span>
+        <span>{bookName} - {title}</span>
       </NavBar>
 
       {/* 主题内容 */}

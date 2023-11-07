@@ -22,6 +22,7 @@
     "firebase": "^10.4.0",
     "jszip": "^3.10.1",
     "lodash-es": "^4.17.21",
+    "pretty-bytes": "^6.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.16.0",
