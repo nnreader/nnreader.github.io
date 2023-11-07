@@ -318,7 +318,7 @@ function Book() {
           </div>
         }
       >
-        <span>{bookName} - {title}</span>
+        <span>{title}</span>
       </NavBar>
 
       {/* 主题内容 */}
