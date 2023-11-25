@@ -7,7 +7,7 @@ import { debounce } from "lodash-es";
 import { getBookInfo } from "../lib/assets";
 import styles from "./Book.module.less";
 import { Novel, transformText } from "../novel";
-import IconFron from "../components/react";
+import IconFront from "../components/react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { NavBar } from "antd-mobile";
 
@@ -95,7 +95,7 @@ function Book() {
     const arr: Array<Menu> = [
       {
         label: "目录",
-        icon: <IconFron name="mulu" color="#fff" />,
+        icon: <IconFront name="mulu" color="#fff" />,
         onClick: () => {
           setToolbarVisible(false);
           setSidebarVisible((val) => !val);
@@ -103,17 +103,17 @@ function Book() {
       },
       {
         label: "亮度",
-        icon: <IconFron name="liangdu" color="#fff" />,
+        icon: <IconFront name="liangdu" color="#fff" />,
         onClick: () => {},
       },
       {
         label: "夜间模式",
-        icon: <IconFron name="yejianmoshi" color="#fff" />,
+        icon: <IconFront name="yejianmoshi" color="#fff" />,
         onClick: () => {},
       },
       {
         label: "设置",
-        icon: <IconFron name="shezhi" color="#fff" />,
+        icon: <IconFront name="shezhi" color="#fff" />,
         onClick: () => {},
       },
     ];
@@ -300,12 +300,12 @@ function Book() {
         onBack={() => navigate(-1)}
         left={
           <div className={styles.rightIcon}>
-            <IconFron style={{ marginRight: 8 }} name="home" color="#fff" onClick={() => navigate("/")} />
+            <IconFront style={{ marginRight: 8 }} name="home" color="#fff" onClick={() => navigate("/")} />
           </div>
         }
         right={
           <div className={styles.rightIcon}>
-            <IconFron
+            <IconFront
               style={{ marginRight: 8 }}
               name="mulu"
               color="#fff"
@@ -314,7 +314,7 @@ function Book() {
                 setSidebarVisible((val) => !val);
               }}
             />
-            <IconFron name="gengduo" color="#fff" onClick={() => setToolbarVisible((val) => !val)} />
+            <IconFront name="gengduo" color="#fff" onClick={() => setToolbarVisible((val) => !val)} />
           </div>
         }
       >

@@ -5,7 +5,7 @@ export interface Novel {
 }
 
 const isSessionLine = (line: string) => {
-  return /^第\s*[^章]+\s*章/.test(line.trimStart());
+  return /^第[\s0-9一二三四五六七八九十百千万]+章/.test(line.trimStart());
 };
 
 export function transformText(text: string): Novel {
