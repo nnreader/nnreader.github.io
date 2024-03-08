@@ -3,6 +3,7 @@ import { useScroll, useClickAway } from "ahooks";
 import classnames from "classnames";
 import { DotLoading } from "antd-mobile";
 import { debounce } from "lodash-es";
+import prettyBytes from "pretty-bytes";
 
 import { getBookInfo } from "../lib/assets";
 import styles from "./Book.module.less";
@@ -25,7 +26,8 @@ function Book() {
   const refSidebar = useRef(null);
   const [scrollHeight, setScrollHeight] = useState(0);
   const [bookName, setBookName] = useState("");
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState<number | void>(undefined);
+  const [loaded, setLoaded] = useState(0);
   const [showNextPage, setShowNextPage] = useState(false);
 
   const updateShowNextPage = useMemo(() => {
@@ -69,7 +71,12 @@ function Book() {
 
   // 获取章节信息
   useEffect(() => {
-    getBookInfo(bookId, setProgress).then((data) => {
+    getBookInfo(bookId, (e) => {
+      setLoaded(e.loaded);
+      if (typeof e.progress === 'number') {
+        setProgress(parseInt((e.progress * 100).toString()));
+      }
+    }).then((data) => {
       setBookName(data.info.name);
       setNovel(transformText(data.content));
     });
@@ -166,17 +173,18 @@ function Book() {
 
   // 渲染章节内容
   const params = useMemo(() => {
-    if (!bookName && progress < 100)
+    if (!bookName && (progress === undefined || progress < 100)) {
       return (
         <>
-          <DotLoading className={styles.loading} /> {progress}%
+          <DotLoading className={styles.loading} /> {typeof progress === "number" ? progress + "%" : prettyBytes(loaded)}
         </>
       );
+    }
 
     return content.split("\n").map((v, index) => {
       return <p key={index}>{v.trim().replace(/\s+/g, " ")}</p>;
     });
-  }, [bookName, content, progress]);
+  }, [bookName, content, loaded, progress]);
 
   // 上一章
   const prevSection = useCallback(() => {

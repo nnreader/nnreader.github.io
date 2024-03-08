@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosProgressEvent } from "axios";
 import rc4 from "crypto-js/rc4";
 import Utf8 from "crypto-js/enc-utf8";
 import meta from "../assets/meta.data?raw";
@@ -9,7 +9,7 @@ export interface Book {
   size: number;
 }
 
-type onProgress = (percent: number) => void;
+type onProgress = (event: AxiosProgressEvent) => void;
 
 let password: string | null = null;
 
@@ -74,9 +74,7 @@ async function _getBookInfo(bookIndex: string, onProgress?: onProgress): Promise
 
   const resp = await axios.get<string>(url, {
     onDownloadProgress: (e) => {
-      const percent = e.total ? Math.floor((e.loaded / e.total) * 100) : 0;
-
-      onProgress?.(percent);
+      onProgress?.(e);
     },
   });
 
