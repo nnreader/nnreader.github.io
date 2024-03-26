@@ -30,8 +30,20 @@ async function generate() {
   if (fs.existsSync(outputAssetsDir)) fs.rmdirSync(outputAssetsDir, { recursive: true });
   fs.mkdirSync(outputAssetsDir);
 
-  for (const item of items) {
-    const filePath = path.join(RESOURCE, item);
+  for (let item of items) {
+    let filePath = path.join(RESOURCE, item);
+
+    if ((item.includes("《") && item.includes("》")) || (item.includes("【") && item.includes("】"))) {
+      item = item.replace(/(《|【)(.*?)(》|】)/, (match, p1, p2, p3) => {
+        return p2;
+      });
+
+      const newFilePath = path.join(RESOURCE, item);
+
+      fs.renameSync(filePath, newFilePath);
+
+      filePath = newFilePath;
+    }
 
     const stat = await fsPromise.stat(filePath);
     const hash = await md5(filePath);
