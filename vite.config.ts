@@ -5,7 +5,7 @@ import topLevelAwait from "vite-plugin-top-level-await";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
+  base: process.env.NODE_ENV === 'production' ? "https://cdn.jsdelivr.net/gh/nnreader/nnreader.github.io@gh-pages/" : './',
   plugins: [
     react(),
     topLevelAwait({
@@ -23,6 +23,5 @@ export default defineConfig({
   build: {
     // 添加 .txt 文件处理规则
     assetsInlineLimit: 0,
-  },
-  assetsInclude: ["**/*.zip"],
+  }
 });
