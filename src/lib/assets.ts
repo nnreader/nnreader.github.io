@@ -70,7 +70,9 @@ async function _getBookInfo(bookIndex: string, onProgress?: onProgress): Promise
 
   if (!bookInfo) throw new Error("未找到数据");
 
-  const url = new URL(`resources/${bookIndex}.txt`, location.href).toString();
+  const base = process.env.NODE_ENV === "production" ? "https://cdn.jsdelivr.net/gh/nnreader/nnreader.github.io@gh-pages" : location.href;
+
+  const url = new URL(`resources/${bookIndex}.txt`, base).toString();
 
   const resp = await axios.get<string>(url, {
     onDownloadProgress: (e) => {
