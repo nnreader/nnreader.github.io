@@ -27,7 +27,7 @@ async function generate() {
     .filter((v) => /\.txt$/.test(v))
     .sort();
 
-  if (fs.existsSync(outputAssetsDir)) fs.rmdirSync(outputAssetsDir, { recursive: true });
+  if (fs.existsSync(outputAssetsDir)) fs.rmSync(outputAssetsDir, { recursive: true });
   fs.mkdirSync(outputAssetsDir);
 
   for (let item of items) {
@@ -68,7 +68,7 @@ async function restore() {
   const meta = JSON.parse(decrypt(fs.readFileSync(META_FILE_PATH, { encoding: "utf-8" })));
 
   if (fs.existsSync(RESOURCE)) {
-    fs.rmdirSync(RESOURCE);
+    fs.rmSync(RESOURCE, { recursive: true});
   } else {
     fs.mkdirSync(RESOURCE);
   }
