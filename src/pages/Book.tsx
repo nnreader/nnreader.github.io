@@ -73,7 +73,7 @@ function Book() {
   useEffect(() => {
     getBookInfo(bookId, (e) => {
       setLoaded(e.loaded);
-      if (typeof e.progress === 'number') {
+      if (typeof e.progress === "number") {
         setProgress(parseInt((e.progress * 100).toString()));
       }
     }).then((data) => {
@@ -288,8 +288,8 @@ function Book() {
               return (
                 <li key={i} className={classnames(i === index ? styles.activeSection : undefined)}>
                   <a
-                    href="javascript: "
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       setIndex(i);
                       setSidebarVisible(false);
                     }}
