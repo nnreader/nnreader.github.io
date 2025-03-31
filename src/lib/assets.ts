@@ -54,8 +54,6 @@ async function _getBooks(): Promise<Book[]> {
 
   const books: Book[] = JSON.parse(new TextDecoder().decode(raw));
 
-  console.log(books)
-
   return books.sort((a, b) => new Date(a.mtime).getTime() - new Date(b.mtime).getTime() > 0 ? -1 : 1);
 }
 
