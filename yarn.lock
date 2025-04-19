@@ -740,6 +740,11 @@
   dependencies:
     "@use-gesture/core" "10.3.0"
 
+"@vitejs/plugin-basic-ssl@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/@vitejs/plugin-basic-ssl/-/plugin-basic-ssl-2.0.0.tgz#9169bfe748743b8806553e0d1aa78e8227c27b2d"
+  integrity sha512-gc9Tjg8bUxBVSTzeWT3Njc0Cl3PakHFKdNfABnZWiUgbxqmHDEn7uECv3fHVylxoYgNzAcmU7ZrILz+BwSo3sA==
+
 "@vitejs/plugin-react-swc@^3.6.0":
   version "3.6.0"
   resolved "https://registry.npmjs.org/@vitejs/plugin-react-swc/-/plugin-react-swc-3.6.0.tgz#dc9cd1363baf3780f3ad3e0a12a46a3ffe0c7526"

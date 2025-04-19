@@ -14,3 +14,13 @@ if ("addEventListener" in document) {
     false
   );
 }
+
+// 注册 Service Worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("/sw.js", { scope: "/resources/" })
+    .then(() => console.log("Service Worker registered"))
+    .catch((error) => {
+      console.error("Service Worker registration failed:", error);
+    });
+}
