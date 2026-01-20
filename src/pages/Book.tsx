@@ -29,6 +29,7 @@ function Book() {
   const [progress, setProgress] = useState<number | void>(undefined);
   const [loaded, setLoaded] = useState(0);
   const [showNextPage, setShowNextPage] = useState(false);
+  const titleRef = useRef(document.title);
 
   const updateShowNextPage = useMemo(() => {
     return debounce(
@@ -276,6 +277,15 @@ function Book() {
       document.removeEventListener("touchend", onTouchEnd);
     };
   }, [nextSection, scroll?.top, scrollHeight, showNextPage]);
+
+  useEffect(() => {
+    document.title = title ? `${title} - ${bookName}` : titleRef.current;
+
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      document.title = titleRef.current;
+    };
+  }, [bookName, title]);
 
   return (
     <div className={styles.reader}>

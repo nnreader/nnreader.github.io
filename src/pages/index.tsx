@@ -54,12 +54,7 @@ const Index = () => {
           <List header="书本列表">
             {filterBooks.map((book) => {
               return (
-                <List.Item
-                  className={styles.listItem}
-                  key={book.index + book.name}
-                  onClick={() => navigate("/book?id=" + book.index)}
-                  extra={prettyBytes(book.size)}
-                >
+                <List.Item className={styles.listItem} key={book.index + book.name} onClick={() => navigate("/book?id=" + book.index)} extra={prettyBytes(book.size)}>
                   {book.name}
                 </List.Item>
               );
